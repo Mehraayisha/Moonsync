@@ -4,39 +4,44 @@ from django.http import JsonResponse
 from django.conf import settings
 
 def get_nearby_doctors(request):
-    # Fetch latitude and longitude from GET parameters
     lat = request.GET.get('lat')
     lon = request.GET.get('lon')
 
-    # Check if lat and lon are provided
     if not lat or not lon:
         return JsonResponse({"error": "Location not provided"}, status=400)
 
-    # API key from settings
-    google_places_api_key = settings.GOOGLE_PLACES_API_KEY
+    # Geoapify API key from settings.py
+    geoapify_key =  settings.GEOAPIFY_API_KEY
 
-    # Google Places API URL
-    url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={lat},{lon}&radius=5000&type=doctor&keyword=gynecologist&key={google_places_api_key}"
-    
-    # Make the request to Google Places API
+    # Geoapify URL (gynecology doctors)
+    url = (
+        "https://api.geoapify.com/v2/places?"
+        "categories=healthcare.clinic_or_praxis.gynaecology"
+        f"&bias=circle:{lon},{lat},10000"
+        "&limit=20"
+        f"&apiKey={geoapify_key}"
+    )
+
     response = requests.get(url)
     data = response.json()
 
-    # Check if the API response contains results
-    if "results" in data:
-        doctors = []
+    doctors = []
 
-        for place in data["results"]:
-            # Collect doctor details
+    # Check if data available
+    if "features" in data:
+        for place in data["features"]:
+            props = place.get("properties", {})
+
             doctor = {
-                "name": place.get("name", "No name available"),
-                "address": place.get("vicinity", "No address available"),
-                "phone": place.get("formatted_phone_number", "N/A"),
-                "website": place.get("website", "#"),
+                "name": props.get("name", "No name available"),
+                "address": props.get("formatted", "No address available"),
+                "phone": props.get("contact", {}).get("phone", "N/A"),
+                "website": props.get("website", "#"),
+                "distance": props.get("distance", 0),
             }
+
             doctors.append(doctor)
 
-        # Render the doctors page and pass the doctor data as context
-        return JsonResponse({'doctors': doctors})
-    # Return an error if no results were found
-    return render(request, 'doctors.html',{'error':"no doctors found nearby"})
+        return JsonResponse({"doctors": doctors})
+
+    return JsonResponse({"error": "No doctors found nearby"})

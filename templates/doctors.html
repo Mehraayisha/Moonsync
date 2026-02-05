@@ -10,16 +10,22 @@
 <body>
     <nav>
         <div class="logo">
-            <img src="{% static 'images/logo.jpg'  %}" alt="img" width="100px">
+            <img src="{% static 'image/logo.jpg'  %}" alt="img" width="100px">
             <p>MOONSYNC</p>
         </div>
     </nav>
     <div class="container">
         <div><h2>Nearby Doctors</h2></div>
-        <div><p class="description">
+        <div id="description-box">
+        <p class="description">
             Searching for doctors nearby has never been easier! Just enter your location and get a list of doctors available in your vicinity. Whether it's for regular checkups, emergencies, or consultations, we've got you covered!
-        </p></div>
-        <div><p id="status">Fetching your location...</p></div>
+        </p>
+    </div>
+
+    <!-- 👇 give this an id -->
+    <div id="status-box">
+        <p id="status">Fetching your location...</p>
+    </div>
         <div id="doctors-list"></div>
     </div>
     <script>
@@ -29,7 +35,9 @@
             .then(data => {
                 let container = document.getElementById("doctors-list");
                 container.innerHTML = "";
-                if (data.doctors.length === 0) {
+                document.getElementById("description-box").style.display = "none";
+                document.getElementById("status-box").style.display = "none";
+                if (!data.doctors ||data.doctors.length === 0) {
                     container.innerHTML = "<p>No doctors found nearby.</p>";
                 } else {
                     data.doctors.forEach(doctor => {

@@ -100,15 +100,24 @@ h2 {
     top:200px;
 }
 #doctors-list {
-    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;        /* allows multiple rows */
+    justify-content: center;
+    gap: 40px;              /* space between cards */
+    margin-top: 40px;
+   z-index: 10;
 }
 
 .doctor-card {
     background: #fff;
-    padding: 15px;
+    padding: 32px;
+    
     border-radius: 8px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     margin-bottom: 15px;
+    width: 30%;
+    height: 150px;
+    
 }
 
 .doctor-card h3 {
