@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json, os, requests
-
+from tracker import settings
 # Load knowledge file once
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 KNOWLEDGE_PATH = os.path.join(BASE_DIR, "menstrual_knowledge.txt")
@@ -9,7 +9,7 @@ KNOWLEDGE_PATH = os.path.join(BASE_DIR, "menstrual_knowledge.txt")
 with open(KNOWLEDGE_PATH, "r", encoding="utf-8") as f:
     MENSTRUAL_KNOWLEDGE = f.read()
 
-OPENROUTER_KEY = os.getenv("OPENROUTER_KEY")
+OPENROUTER_KEY = settings.OPENROUTER_KEY
 
 
 @csrf_exempt
