@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from tracker1.models import MenstrualCycle # Import the MenstrualCycle model
+from tracker1.ml_utils import predict_cycle_length
+from .forms import MenstrualCycleForm
 #by sherin
 
 #------
@@ -18,19 +20,16 @@ def products(request):
 def video(request):
     return render(request, 'video.html')
 
+
 @login_required
 def tracking(request):
-    today = datetime.today().date()  # Get today's date
+    today = datetime.today().date()
     current_hour = datetime.now().hour
-    start_of_week = today - timedelta(days=today.weekday())  # Get the start of the current week (Monday)
+    start_of_week = today - timedelta(days=today.weekday())
 
-    # Generate the list of dates for the current week (Monday to Sunday)
-    week_dates = [(start_of_week + timedelta(days=i)) for i in range(7)]
-
-    # Extract the names of the weekdays (Monday, Tuesday, etc.)
+    week_dates = [start_of_week + timedelta(days=i) for i in range(7)]
     week_names = [date.strftime("%A")[0] for date in week_dates]
 
-    # Determine the greeting based on the time of day
     if 5 <= current_hour < 12:
         greeting = "Good Morning"
     elif 12 <= current_hour < 18:
@@ -38,45 +37,96 @@ def tracking(request):
     else:
         greeting = "Good Evening"
 
-    # Get the current day (number) from today's date
-    current_day_number = today.day  # e.g., 19
+    current_day_number = today.day
 
-    # Fetch the user's menstrual cycle information
     cycle_info = None
     period_dates = []
     period_data = None
-    if request.user.is_authenticated:  # Ensure the user is authenticated
-        user = request.user
-        if MenstrualCycle.objects.filter(user=user).exists():
-            cycle_info = MenstrualCycle.objects.get(user=user)
-             # Calculate the start and end date of the user's period
-            last_period_date = cycle_info.last_period
-            cycle_length = cycle_info.cycle_length
-            period_duration = cycle_info.period_duration
 
-            # Predict next period dates
-            next_period_start, next_period_end = predict_next_period(last_period_date, cycle_length, period_duration)
+    user = request.user
 
-            # Check if the period overlaps with the current week
-            period_dates = []
-            for i in range(period_duration):
-                period_day = next_period_start + timedelta(days=i)
-                if period_day <= today and period_day in week_dates:
-                    period_dates.append(period_day)
+    if MenstrualCycle.objects.filter(user=user).exists():
+        cycle_info = MenstrualCycle.objects.get(user=user)
 
-            period_data = get_period_progress(last_period_date, cycle_length, period_duration)
-       
-    
-    # Pass the variables to the template
+        last_period_date = cycle_info.last_period
+        period_duration = cycle_info.period_duration
+
+        # Default fallback
+        cycle_length = cycle_info.cycle_length
+
+        # Try ML prediction
+        try:
+            age = cycle_info.age
+            bmi = cycle_info.calculate_bmi()
+
+            if age and bmi:
+                luteal_length = 14
+                total_score = 10
+                ovulation_day = 14
+
+                predicted_length = predict_cycle_length(
+                    age,
+                    bmi,
+                    period_duration,
+                    luteal_length,
+                    total_score,
+                    ovulation_day
+                )
+
+                cycle_length = predicted_length
+
+        except Exception as e:
+            print("ML error:", e)
+
+        print("====================================")
+        print("User:", user.username)
+        print("Entered cycle length:", cycle_info.cycle_length)
+        print("Predicted cycle length:", cycle_length)
+        print("Last period:", last_period_date)
+
+        next_period_start, next_period_end = predict_next_period(
+            last_period_date,
+            cycle_length,
+            period_duration
+        )
+
+        print("Next period starts:", next_period_start)
+        print("Next period ends:", next_period_end)
+        print("====================================")
+
+        for i in range(period_duration):
+            period_day = next_period_start + timedelta(days=i)
+            if period_day <= today and period_day in week_dates:
+                period_dates.append(period_day)
+
+        period_data = get_period_progress(
+            last_period_date,
+            cycle_length,
+            period_duration
+        )
+
     return render(request, "tracking.html", {
         'greeting': greeting,
         'week_names': week_names,
-        'week_dates': week_dates,  # Pass the full date objects
+        'week_dates': week_dates,
         'today': today,
-        'current_day_number': current_day_number,  # Pass the day number to highlight
+        'current_day_number': current_day_number,
         'cycle_info': cycle_info,
-        'period_dates': period_dates ,
-         'period_data': period_data, # Pass the list of period dates
+        'period_dates': period_dates,
+        'period_data': period_data,
+    })
+
+
+
+    return render(request, "tracking.html", {
+        'greeting': greeting,
+        'week_names': week_names,
+        'week_dates': week_dates,
+        'today': today,
+        'current_day_number': current_day_number,
+        'cycle_info': cycle_info,
+        'period_dates': period_dates,
+        'period_data': period_data,
     })
 
 
@@ -117,42 +167,45 @@ def predict_next_period(last_period, cycle_length, period_duration):
 
 
 
-@login_required  # Ensure the user is logged in
+ # Ensure the user is logged in
+@login_required
+@login_required
 def cycle_details(request):
     user = request.user
 
-    # Check if the user already has menstrual cycle details
     try:
         cycle_info = MenstrualCycle.objects.get(user=user)
         return redirect('tracking')
-
     except MenstrualCycle.DoesNotExist:
-        cycle_info = None  # User doesn't have details, so we can collect them
+        cycle_info = None
 
     if request.method == 'POST':
-        # Collect menstrual cycle details from the POST request
         last_period = request.POST.get('last_period')
         cycle_length = request.POST.get('cycle_length')
         period_duration = request.POST.get('period_duration')
-        cycle_regular = request.POST.get('cycle_regular') == 'on'  # Handle checkbox (True/False)
+        cycle_regular = request.POST.get('cycle_regular') == 'True'
 
-        # If the user doesn't have menstrual cycle details, create a new record
+        age = request.POST.get('age')
+        height = request.POST.get('height')
+        weight = request.POST.get('weight')
+
         if cycle_info is None:
             cycle_info = MenstrualCycle(user=user)
 
-        # Update the cycle info
         cycle_info.last_period = last_period
         cycle_info.cycle_length = cycle_length
         cycle_info.period_duration = period_duration
         cycle_info.cycle_regular = cycle_regular
+        cycle_info.age = age
+        cycle_info.height = height
+        cycle_info.weight = weight
+
         cycle_info.save()
 
-        # Display success message
-        messages.success(request, 'Cycle details have been saved successfully!')
-        return redirect('tracking')  # Redirect to home page after saving the details
+        messages.success(request, 'Cycle details saved successfully!')
+        return redirect('tracking')
 
-    return render(request, 'details.html', {'cycle_info': cycle_info})  # Render the details page
-
+    return render(request, 'details.html')
 
 def get_period_progress(last_period_date, cycle_length, period_duration):
     today = datetime.today().date()
