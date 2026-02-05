@@ -16,6 +16,8 @@ features = [
     "TotalMensesScore",
     "EstimatedDayofOvulation"
 ]
+print("Number of rows:", len(df))
+print("Number of columns:", len(df.columns))
 
 target = "LengthofCycle"
 

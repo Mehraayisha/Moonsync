@@ -4,73 +4,122 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home Page</title>
-  <!-- Link to external CSS -->
+  <title>Moonsync Tracker</title>
+
   {% load static %}
   <link rel="stylesheet" href="{% static 'styles/tracking.css' %}">
 </head>
+
 <body>
-  <nav>
-      <img src="{% static 'image/logo.jpg' %}" alt="img" width="100px">
-      <p>MOONSYNC</p>
-  </nav>
-  <header class="greeting">
-    <h1>{{ greeting }},{{ request.user.username }}</h1>
-    <h1>Welcome to our Tracker</h1>
-  </header>
 
-  <div class="container">
-    
-    <div id="calendar">
-      <!-- Row for Weekday Names (Mon, Tue, etc.) -->
-      <div class="calendar-row weekday-row">
-        {% for day in week_names %}
-          <div class="day-name">{{ day }}</div> <!-- Show weekday names (Mon, Tue, etc.) -->
-        {% endfor %}
-      </div>
-
-      <div class="calendar-row date-row">
-        {% for day in week_dates %}
-          <div class="day {% if day in period_dates %}has-period{% endif %} {% if day.day == current_day_number %}current-day{% endif %}">
-            {{ day.day }} <!-- Display only the day of the month -->
-      
-            <!-- Add the red dot if the day is in period_dates -->
-            {% if day in period_dates %}
-              <div class="red-dot"></div>
-            {% endif %}
-          </div>
-        {% endfor %}
-      </div>
-      
-      
+  <!-- ================= NAVBAR ================= -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <img src="{% static 'image/logo.jpg' %}" alt="logo" width="60px">
+      <p class="logo-text">MOONSYNC</p>
     </div>
+
+    <!-- Calendar Icon -->
+    <button id="calendarBtn" class="calendar-btn">📅</button>
+  </nav>
+
+
+  <!-- ================= HERO SECTION ================= -->
+  <section class="hero">
+
+    <div class="greeting">
+      <h2>{{ greeting }}, {{ request.user.username }}</h2>
+      <p>Welcome back to your tracker</p>
+    </div>
+
+    {% if period_data.on_period %}
+      <div class="outer-circle">
+        <div class="progress-ring"
+             style="--progress: {{ period_data.progress }};">
+        </div>
+
+        <div class="inner-circle">
+          <h2>{{ period_data.day_of_period }}</h2>
+          <p>of {{ period_data.period_duration }} days</p>
+        </div>
+      </div>
+
+    {% else %}
+      <div class="no-period">
+        <h3>Your period is coming in</h3>
+        <h1>{{ period_data.days_left }} days</h1>
+      </div>
+    {% endif %}
+
+  </section>
+
+
+  <!-- ================= DASHBOARD SECTION ================= -->
+  <div class="container">
     <h2>Your Dashboard</h2>
     <p>Track your tasks and progress efficiently.</p>
-    
-    <div class="progress-container">
-      {% if period_data.on_period %}
-          <!-- Progress Ring for Current Period -->
-          <div class="outer-circle">
-              <div class="progress-ring" id="progressRing" style="--progress: {{ period_data.progress }};"></div>
-              <div class="inner-circle"></div>
-          </div>
-          
-          <!-- Progress Value -->
-          
-          
-          <div class="progress-value" >
-            <p> {{ period_data.day_of_period }}th day of period out of {{ period_data.period_duration }}</p>
-             <!-- <p> {{ period_data.day_of_period }}th day of period out of {{ period_data.period_duration }}</p> -->
-          </div>
-      {% else %}
-          <p>Your period is coming in {{ period_data.days_left }} days!</p>
-      {% endif %}
   </div>
-  
-  
-    
 
 
-  <script src="{% static 'js/index.js' %}"></script>
+  <!-- ================= CALENDAR MODAL ================= -->
+  <div id="calendarModal" class="calendar-modal">
+
+    <div class="calendar-content">
+      <span id="closeCalendar" class="close-btn">&times;</span>
+
+      <h2 class="calendar-title">Your Calendar</h2>
+
+      <div id="calendar">
+
+        <!-- Week Names -->
+        <div class="calendar-row weekday-row">
+          {% for day in week_names %}
+            <div class="day-name">{{ day }}</div>
+          {% endfor %}
+        </div>
+
+        <!-- Dates -->
+        <div class="calendar-row date-row">
+          {% for day in week_dates %}
+            <div class="day
+                {% if day in period_dates %}has-period{% endif %}
+                {% if day.day == current_day_number %}current-day{% endif %}">
+              
+              {{ day.day }}
+
+              {% if day in period_dates %}
+                <div class="red-dot"></div>
+              {% endif %}
+
+            </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================= JAVASCRIPT ================= -->
+  <script>
+    const calendarBtn = document.getElementById("calendarBtn");
+    const calendarModal = document.getElementById("calendarModal");
+    const closeCalendar = document.getElementById("closeCalendar");
+
+    calendarBtn.addEventListener("click", () => {
+      calendarModal.style.display = "flex";
+    });
+
+    closeCalendar.addEventListener("click", () => {
+      calendarModal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === calendarModal) {
+        calendarModal.style.display = "none";
+      }
+    });
+  </script>
+
 </body>
 </html>

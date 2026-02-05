@@ -1,210 +1,226 @@
-@import url('https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+
 :root{
-    --color:rgb(166, 98, 125);
-    --seccolor:rgb(240, 198, 215);
-    --text:white;
-    --third:rgb(255, 219, 233);
-    font-family: "Quicksand", serif;
-    font-optical-sizing: auto;
-    font-style: normal;
-   
+    --color: rgb(166, 98, 125);
+    --seccolor: rgb(240, 198, 215);
+    --third: rgb(255, 219, 233);
+    --bg: rgb(255, 223, 228);
+    --white: #ffffff;
 }
-/* General Styles */
+
+/* ================= GENERAL ================= */
+
 body {
-    font-family: Arial, sans-serif;
-    /* background-color: #ffffff; */
-    color: #333;
     margin: 0;
     padding: 0;
-    line-height: 1.6;
-    font-family: "Quicksand", serif;
-    font-optical-sizing: auto;
-    font-style: normal;
-    background-color:rgb(255, 223, 228);
-    /* background-image: url("../image/background.jpg"); */
-    /* background-repeat: no-repeat; */
-   
+    font-family: "Quicksand", sans-serif;
+    background-color: var(--bg);
+    color: var(--color);
 }
 
-nav{
+/* ================= NAVBAR ================= */
+
+.navbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: var(--white);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.nav-left{
     display: flex;
     align-items: center;
-    font-size:25px; 
-    background-color: rgb(253, 252, 253); 
-}
-nav p{
-    color: var(--color); 
-    font-weight: 900;
-    font-size: xx-large;
-    margin-left: -10px;
-    height: 50px;
-}
-/* Header */
-/* .greeting {
-    background-color:black;
-    color: rgb(23, 2, 62);
-    text-align: center;
-    font-size: 1.5rem;
-    width: 100%;
-    height: 100px;
-} */
-/* .greeting {
-    color: var(--color);
-    text-align: center;
-    font-size: 1.5rem;
-    width: 100%;
-    height: 100px;
-    z-index: 10;
-} */
-.greeting {
-    color: var(--color);
-    text-align: center;
-    font-size: 1.5rem;
-    width: 100%;
-    height: 100px;
-    z-index: 10;
+    gap: 10px;
 }
 
-.greeting h1 {
-    color:rgb(166, 98, 125);
-    font-size: 2rem;
-    line-height: 0.7;
-}
-
-.container {
-    max-width: 800px;
-    margin: 50px auto;
-    text-align: center;
+.logo-text{
+    font-weight: 800;
+    font-size: 24px;
     color: var(--color);
 }
-/* h1 {
-    color: #8a150a;
-} */
 
-#calendar {
-    padding: 20px;
-    background-color: rgb(200, 141, 160);
-    border-radius: 8px;
-    margin-top: -20px;
+.calendar-btn{
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
 }
 
-/* Flexbox Row for Weekday Names and Dates */
-.calendar-row {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 10px;
-    font-weight: bold;
-    font-size: larger;
+.calendar-btn:hover{
+    transform: scale(1.2);
 }
 
-/* Weekday Names Styling */
-.weekday-row .day-name {
-    font-weight: bold;
+/* ================= HERO SECTION ================= */
+
+.hero{
     text-align: center;
-    font-size: larger;
-    padding: 5px;
-    width: 50px;
-    color: white;
+    padding: 40px 20px;
 }
 
-/* Dates Styling */
-.date-row .day {
-    position: relative;
-    padding: 10px;
-    background-color: #ffcccc;
-    background-color: white;
-    text-align: center;
-    border-radius: 30px;
-    font-weight: bold;
-    width: 30px;
-    height: 60px;
+.greeting h2{
+    margin: 5px 0;
 }
 
-/* Highlight the current day */
-#calendar .current-day {
-    background-color: rgb(246, 135, 135);
-    font-weight: bold;
-    color: var(--color);
-    z-index: 15;
+.greeting p{
+    margin-bottom: 30px;
 }
 
-/* Hover effect on the days */
-#calendar .day:hover {
-    background-color: #ffb3b3;
-}
+/* ================= PROGRESS RING ================= */
 
-/* Red Dot Styling */
-.red-dot {
-    width: 10px;
-    height: 10px;
-    background-color:var(--color);
-    border-radius: 50%;
-    position: absolute;
-    bottom: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-}
-
-/* Calendar day with a red dot */
-.calendar-day.has-period {
-    background-color: #ffcccc;
-}
-
-/* Progress Container */
-.progress-container {
-    margin-top: 30px;
-    position: absolute;
-    left: 600px;
-    width: 150px;
-    height: 150px;
-    z-index: 20;
-}
-
-/* Outer static circle (Ring) */
 .outer-circle {
-    width: 350px;
-    height: 350px;
+    width: 260px;
+    height: 260px;
+    margin: auto;
     border-radius: 50%;
     background: #ddd;
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: relative;
 }
 
-/* Inner static circle (White center) */
-.inner-circle {
-    width: 275px;
-    height: 275px;
-    border-radius: 50%;
-    background: rgb(255, 223, 228); /* Set the inner circle to white */
-    position: absolute;
-    top: 38px;
-    left: 38px;
-    z-index: 25;
-}
-
-/* Progress ring (Dark Pink ring) */
 .progress-ring {
     position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: conic-gradient(var(--color) var(--progress, 0%), #ddd var(--progress, 0%)); /* Dark pink color */
-    z-index: 10;
+    background: conic-gradient(
+        var(--color) var(--progress, 0%),
+        #ddd var(--progress, 0%)
+    );
 }
 
-/* Text displaying progress value */
-.progress-value {
+.inner-circle {
     position: absolute;
-    top: 109%;
-    left: 113%;
-    transform: translate(-50%, -50%);
-    font-size: 20px;
+    width: 200px;
+    height: 200px;
+    background: var(--bg);
+    border-radius: 50%;
+    top: 30px;
+    left: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+}
+
+.inner-circle h2{
+    margin: 0;
+    font-size: 40px;
+}
+
+.inner-circle p{
+    margin: 0;
+    font-size: 14px;
+}
+
+.no-period h1{
+    font-size: 40px;
+    margin: 10px 0;
+}
+
+/* ================= DASHBOARD ================= */
+
+.container{
+    text-align: center;
+    margin: 40px auto;
+}
+
+/* ================= CALENDAR MODAL ================= */
+
+.calendar-modal{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.calendar-content{
+    background: var(--white);
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    animation: slideDown 0.3s ease;
+}
+
+.calendar-title{
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.close-btn{
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* ================= CALENDAR ================= */
+
+#calendar{
+    padding: 20px;
+    background-color: var(--seccolor);
+    border-radius: 15px;
+}
+
+.calendar-row{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.day-name{
+    width: 40px;
+    text-align: center;
     font-weight: bold;
-    color:var(--color);
-    z-index: 35;
-    width:150px;
+    color: var(--white);
+}
+
+.day{
+    position: relative;
+    width: 40px;
+    height: 40px;
+    background: var(--white);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.day:hover{
+    background: var(--third);
+}
+
+.current-day{
+    background: rgb(246, 135, 135);
+    color: var(--white);
+}
+
+.red-dot{
+    width: 8px;
+    height: 8px;
+    background: var(--color);
+    border-radius: 50%;
+    position: absolute;
+    bottom: 5px;
+}
+
+/* ================= ANIMATION ================= */
+
+@keyframes slideDown{
+    from{
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to{
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
