@@ -60,3 +60,4 @@ User question: {user_message}
 
     except Exception as e:
         return JsonResponse({"reply": f"Error: {str(e)}"})
+
