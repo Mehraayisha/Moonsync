@@ -21,6 +21,7 @@ def video(request):
     return render(request, 'video.html')
 
 
+
 @login_required
 def tracking(request):
     today = datetime.today().date()
@@ -94,16 +95,20 @@ def tracking(request):
         print("Next period ends:", next_period_end)
         print("====================================")
 
+        # CHANGED: Generate ALL period dates for the calendar (entire period duration)
+        period_dates = []
         for i in range(period_duration):
             period_day = next_period_start + timedelta(days=i)
-            if period_day <= today and period_day in week_dates:
-                period_dates.append(period_day)
+            period_dates.append(period_day.strftime('%Y-%m-%d'))
 
         period_data = get_period_progress(
             last_period_date,
             cycle_length,
             period_duration
         )
+        
+        # ADDED: Add period_dates to period_data so it's accessible in template
+        period_data['period_dates'] = period_dates
 
     return render(request, "tracking.html", {
         'greeting': greeting,
@@ -112,24 +117,10 @@ def tracking(request):
         'today': today,
         'current_day_number': current_day_number,
         'cycle_info': cycle_info,
-        'period_dates': period_dates,
         'period_data': period_data,
     })
-
-
-
-    return render(request, "tracking.html", {
-        'greeting': greeting,
-        'week_names': week_names,
-        'week_dates': week_dates,
-        'today': today,
-        'current_day_number': current_day_number,
-        'cycle_info': cycle_info,
-        'period_dates': period_dates,
-        'period_data': period_data,
-    })
-
-
+    
+    # REMOVED: Delete the duplicate return statement below
 
 @login_required  # Ensure the user is logged in before accessing this view
 def tracker(request):
@@ -209,32 +200,42 @@ def cycle_details(request):
 
 def get_period_progress(last_period_date, cycle_length, period_duration):
     today = datetime.today().date()
-    # Calculate the start and end of the current period
     next_period_start, next_period_end = predict_next_period(last_period_date, cycle_length, period_duration)
 
     if next_period_start <= today <= next_period_end:
-        # User is on their period, calculate the progress and the day of the period
-        days_into_period = (today - next_period_start).days + 1  # +1 because the period starts on the first day
+        days_into_period = (today - next_period_start).days + 1
         progress = (days_into_period / period_duration) * 100
+        
+        # Generate period dates for this period
+        current_period_dates = [
+            (next_period_start + timedelta(days=i)).strftime('%Y-%m-%d') 
+            for i in range(period_duration)
+        ]
+        
         return {
             'on_period': True,
             'progress': round(progress, 2),
-            'day_of_period': days_into_period,  # The current day of the period
-            'period_duration': period_duration,  # The total length of the period
-            'days_left': None ,
-            'period_days': [next_period_start + timedelta(days=i) for i in range(days_into_period)] # No need to show days left if on period
+            'day_of_period': days_into_period,
+            'period_duration': period_duration,
+            'days_left': None,
+            'period_dates': current_period_dates
         }
     else:
-        # User is not on their period, calculate days until next period
         days_until_next_period = (next_period_start - today).days
         if days_until_next_period < 0:
-            # In case there's a mistake with the dates, fallback to zero days
             days_until_next_period = 0
+        
+        # Generate future period dates
+        future_period_dates = [
+            (next_period_start + timedelta(days=i)).strftime('%Y-%m-%d') 
+            for i in range(period_duration)
+        ]
+        
         return {
             'on_period': False,
             'progress': 0,
             'day_of_period': None,
             'period_duration': None,
             'days_left': days_until_next_period,
-            'period_days': []
+            'period_dates': future_period_dates
         }

@@ -4,73 +4,265 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home Page</title>
-  <!-- Link to external CSS -->
+  <title>Moonsync Tracker</title>
+
   {% load static %}
   <link rel="stylesheet" href="{% static 'styles/tracking.css' %}">
 </head>
-<body> 
-  <nav>
-      <img src="{% static 'image/logo.jpg' %}" alt="img" width="100px">
-      <p>MOONSYNC</p>
-  </nav>
-  <header class="greeting">
-    <h1>{{ greeting }},{{ request.user.username }}</h1>
-    <h1>Welcome to our Tracker</h1>
-  </header>
 
-  <div class="container">
-    
-    <div id="calendar">
-      <!-- Row for Weekday Names (Mon, Tue, etc.) -->
-      <div class="calendar-row weekday-row">
-        {% for day in week_names %}
-          <div class="day-name">{{ day }}</div> <!-- Show weekday names (Mon, Tue, etc.) -->
-        {% endfor %}
-      </div>
+<body>
 
-      <div class="calendar-row date-row">
-        {% for day in week_dates %}
-          <div class="day {% if day in period_dates %}has-period{% endif %} {% if day.day == current_day_number %}current-day{% endif %}">
-            {{ day.day }} <!-- Display only the day of the month -->
-      
-            <!-- Add the red dot if the day is in period_dates -->
-            {% if day in period_dates %}
-              <div class="red-dot"></div>
-            {% endif %}
-          </div>
-        {% endfor %}
-      </div>
-      
-      
+  <!-- ================= NAVBAR ================= -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <img src="{% static 'image/logo.jpg' %}" alt="logo" width="60px">
+      <p class="logo-text">MOONSYNC</p>
     </div>
-    <h2>Your Dashboard</h2>
-    <p>Track your tasks and progress efficiently.</p>
+
+    <!-- Calendar Icon -->
+    <button id="calendarBtn" class="calendar-btn">📅</button>
+  </nav>
+
+
+    <!-- ================= HERO SECTION ================= -->
+  <section class="hero">
     
-    <div class="progress-container">
-      {% if period_data.on_period %}
-          <!-- Progress Ring for Current Period -->
-          <div class="outer-circle">
-              <div class="progress-ring" id="progressRing" style="--progress: {{ period_data.progress }};"></div>
-              <div class="inner-circle"></div>
+
+    <!-- MAIN LAYOUT: Progress Ring + Cycle Cards -->
+    <div class="hero-content">
+      
+      <!-- LEFT SIDE - 2 Cards -->
+      <div class="cycle-cards-side left-cards">
+        {% if cycle_info %}
+          <div class="cycle-card">
+            <div class="card-icon">📅</div>
+            <h3>Cycle Length</h3>
+            <p class="card-value">{{ cycle_info.cycle_length }} days</p>
           </div>
-          
-          <!-- Progress Value -->
-          
-          
-          <div class="progress-value" >
-            <p> {{ period_data.day_of_period }}th day of period out of {{ period_data.period_duration }}</p>
-             <!-- <p> {{ period_data.day_of_period }}th day of period out of {{ period_data.period_duration }}</p> -->
+
+          <div class="cycle-card">
+            <div class="card-icon">🩸</div>
+            <h3>Period Duration</h3>
+            <p class="card-value">{{ cycle_info.period_duration }} days</p>
           </div>
-      {% else %}
-          <p>Your period is coming in {{ period_data.days_left }} days!</p>
-      {% endif %}
+        {% endif %}
+      </div>
+
+      <!-- CENTER - Progress Ring -->
+      <div class="center-ring">
+        {% if period_data.on_period %}
+          <div class="progress-wrapper">
+            <div class="outer-circle">
+              <div class="progress-ring" style="--progress: {{ period_data.progress }};"></div>
+              <div class="inner-circle">
+                <h2>{{ period_data.day_of_period }}</h2>
+                <p>of {{ period_data.period_duration }} days</p>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <div class="no-period">
+            <h3>Your period is coming in</h3>
+            <h1>{{ period_data.days_left }} days</h1>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- RIGHT SIDE - 2 Cards -->
+      <div class="cycle-cards-side right-cards">
+        {% if cycle_info %}
+          <div class="cycle-card">
+            <div class="card-icon">📍</div>
+            <h3>Last Period</h3>
+            <p class="card-value">{{ cycle_info.last_period|date:"M d, Y" }}</p>
+          </div>
+
+          {% if period_data.on_period %}
+            <div class="cycle-card active">
+              <div class="card-icon">🔴</div>
+              <h3>Status</h3>
+              <p class="card-value">On Period</p>
+            </div>
+          {% else %}
+            <div class="cycle-card">
+              <div class="card-icon">⏳</div>
+              <h3>Days Until</h3>
+              <p class="card-value">{{ period_data.days_left }} days</p>
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+
+    </div>
+
+    <!-- Message if no cycle info -->
+    {% if not cycle_info %}
+      <p style="color: rgba(166, 98, 125, 0.6); margin: 30px 0; font-size: 16px;">
+        Please update your cycle information to get started.
+        <a href="{% url 'cycle_details' %}" style="color: var(--color); font-weight: 600; text-decoration: none;">Update Now →</a>
+      </p>
+    {% endif %}
+
+  </section>
+
+  <!-- REMOVE THE OLD DASHBOARD SECTION BELOW - Delete this entire div -->
+  <!-- <div class="container">
+    <h2>Your Cycle Information</h2>
+    ...
+  </div> -->
+  <!-- ================= CALENDAR MODAL ================= -->
+
+
+  <!-- ================= CALENDAR MODAL ================= -->
+  <div id="calendarModal" class="calendar-modal">
+
+    <div class="calendar-content">
+      <div class="calendar-header">
+        <button id="prevMonth" class="month-nav">❮</button>
+        <h2 id="monthYear" class="calendar-title">Month Year</h2>
+        <button id="nextMonth" class="month-nav">❯</button>
+      </div>
+
+      <span id="closeCalendar" class="close-btn">&times;</span>
+
+      <div id="calendar">
+
+        <!-- Week Names -->
+        <div class="calendar-row weekday-row">
+          <div class="day-name">Sun</div>
+          <div class="day-name">Mon</div>
+          <div class="day-name">Tue</div>
+          <div class="day-name">Wed</div>
+          <div class="day-name">Thu</div>
+          <div class="day-name">Fri</div>
+          <div class="day-name">Sat</div>
+        </div>
+
+        <!-- Dates Grid -->
+        <div id="datesGrid" class="dates-grid">
+          <!-- Generated by JavaScript -->
+        </div>
+
+      </div>
+    </div>
   </div>
-  
-  
-    
 
 
-  <script src="{% static 'js/index.js' %}"></script>
+  <!-- ================= JAVASCRIPT ================= -->
+  <script>
+    const calendarBtn = document.getElementById("calendarBtn");
+    const calendarModal = document.getElementById("calendarModal");
+    const closeCalendar = document.getElementById("closeCalendar");
+    const prevMonth = document.getElementById("prevMonth");
+    const nextMonth = document.getElementById("nextMonth");
+    const monthYear = document.getElementById("monthYear");
+    const datesGrid = document.getElementById("datesGrid");
+
+    let currentDate = new Date();
+
+    // Get period dates from Django context
+    const periodDates = {{ period_data.period_dates|safe }};
+
+    function isPeriodDate(year, month, day) {
+      const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      return periodDates.includes(dateString);
+    }
+
+    function renderCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      
+      monthYear.textContent = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const prevLastDay = new Date(year, month, 0);
+      
+      const firstDayIndex = firstDay.getDay();
+      const lastDayNumber = lastDay.getDate();
+      const prevLastDayNumber = prevLastDay.getDate();
+      
+      datesGrid.innerHTML = '';
+      
+      // Previous month days
+      for (let i = firstDayIndex - 1; i >= 0; i--) {
+        const day = prevLastDayNumber - i;
+        const dayElement = createDayElement(day, false, false, false);
+        datesGrid.appendChild(dayElement);
+      }
+      
+      // Current month days
+      for (let i = 1; i <= lastDayNumber; i++) {
+        const date = new Date(year, month, i);
+        const isCurrentDay = new Date().toDateString() === date.toDateString();
+        const hasPeriod = isPeriodDate(year, month, i);
+        const dayElement = createDayElement(i, true, isCurrentDay, hasPeriod);
+        datesGrid.appendChild(dayElement);
+      }
+      
+      // Next month days
+      const totalCells = datesGrid.children.length;
+      const remainingCells = 42 - totalCells;
+      for (let i = 1; i <= remainingCells; i++) {
+        const dayElement = createDayElement(i, false, false, false);
+        datesGrid.appendChild(dayElement);
+      }
+    }
+
+        function createDayElement(day, isCurrentMonth, isToday, hasPeriod) {
+      const div = document.createElement('div');
+      div.className = 'day';
+      
+      if (!isCurrentMonth) {
+        div.classList.add('other-month');
+      }
+      if (isToday) {
+        div.classList.add('current-day');
+      }
+      if (hasPeriod && isCurrentMonth) {
+        div.classList.add('period-day');
+      }
+      
+      div.textContent = day;
+
+      // CHANGE: Add dot ONLY to current day (remove hasPeriod condition)
+      if (isToday && hasPeriod && isCurrentMonth) {
+        const dot = document.createElement('span');
+        dot.className = 'period-dot';
+        div.appendChild(dot);
+      }
+
+      return div;
+    }
+
+    calendarBtn.addEventListener("click", () => {
+      calendarModal.style.display = "flex";
+      renderCalendar();
+    });
+
+    closeCalendar.addEventListener("click", () => {
+      calendarModal.style.display = "none";
+    });
+
+    prevMonth.addEventListener("click", () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      renderCalendar();
+    });
+
+    nextMonth.addEventListener("click", () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      renderCalendar();
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === calendarModal) {
+        calendarModal.style.display = "none";
+      }
+    });
+
+    // Initial render
+    renderCalendar();
+  </script>
+
 </body>
 </html>
