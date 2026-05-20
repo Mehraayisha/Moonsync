@@ -41,14 +41,13 @@ postgres sql
 # Run
 python manage.py runserver
 
-### Project Documentation
-For Software:
 
-# Screenshots (Add at least 3)
+
+# Screenshots 
 ![Screenshot 2025-02-01 174814](https://github.com/user-attachments/assets/dcac5152-0f7b-4602-93eb-ee713be43d6f)
-this is our homepage
+ homepage
 ![Screenshot 2025-02-01 174849](https://github.com/user-attachments/assets/9b3e4be2-2a41-4e39-a91a-f96e5619f640)
-this selfcare page
+ selfcare page
 ![Screenshot 2025-02-01 174948](https://github.com/user-attachments/assets/b7dd5478-0dc8-43a2-b721-829899e9b1d3)
 products page
 ![Screenshot 2025-02-01 175013](https://github.com/user-attachments/assets/b64df936-4d40-4d85-abeb-9bf7d6f29e90)
@@ -59,7 +58,6 @@ doctors searching page
 
 tracking page
 
-For Hardware:
 
 # Build Photos
 ![WhatsApp Image 2025-02-01 at 17 58 08_0f8f1ee5](https://github.com/user-attachments/assets/1af58299-0492-490f-ae5d-fe77f6707e72)
